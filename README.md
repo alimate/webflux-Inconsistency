@@ -64,7 +64,7 @@ class ApplicationTest {
     }
 }
 ```
-As you can see, the same request generates different results in `@SpringBootTest`s and `@WebFluxTes`s.
+As you can see, the same request generates different results in `@SpringBootTest`s and `@WebFluxTest`s.
 ## A Quick Note
 If we register the handler bean of type `ErrorWebExceptionHandler` and not the current `WebExceptionHandler`, everything
 would work just fine.
