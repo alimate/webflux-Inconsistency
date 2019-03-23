@@ -1,6 +1,6 @@
 # Demo Reactive Project
-This project is created to demonstrate an inconsistent behavior between `@WebFluxTest`s and what happens in the real world
-, when we manually run a Spring Boot application.
+This project is created to demonstrate an inconsistent behavior between `@WebFluxTest`s and what happens in the real world, 
+when we manually run a Spring Boot application.
 
 ## Steps to Reproduce
 As you can spot from the project files, we registered a bean of type 
@@ -42,8 +42,29 @@ class DasControllerTest {
     }
 }
 ```
-Here the registered error handler caught the exception and returned the expected `400 Bad Request`.
+Here the registered error handler caught the exception and returned the expected `400 Bad Request`. This behavior is even
+inconsistent with more general `@SpringBootTest`s:
+```kotlin
+@SpringBootTest
+@AutoConfigureWebTestClient
+class ApplicationTest {
 
+    @Autowired private lateinit var client: WebTestClient
+
+    @Test
+    fun `Any request to fail endpoint would fail with 500 error`() {
+        client.get().uri("/fail").exchange()
+                .expectStatus().is5xxServerError
+                .expectBody()
+                    .jsonPath("$.path").isEqualTo("/fail")
+                    .jsonPath("$.message").isEqualTo("Failed!")
+                    .jsonPath("$.status").isEqualTo(500)
+                    .jsonPath("$.error").isEqualTo("Internal Server Error")
+                    .jsonPath("$.timestamp").exists()
+    }
+}
+```
+As you can see, the same request generates different results in `@SpringBootTest`s and `@WebFluxTes`s.
 ## A Quick Note
 If we register the handler bean of type `ErrorWebExceptionHandler` and not the current `WebExceptionHandler`, everything
 would work just fine.
